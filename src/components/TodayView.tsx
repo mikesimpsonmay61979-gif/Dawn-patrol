@@ -1,11 +1,10 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect, useState } from "react";
+import { AdSlot } from "@/components/AdSlot";
 import { MoonDisc } from "@/components/MoonDisc";
 import { formatClock, formatWhen, prettyNow } from "@/lib/dates";
 import { compass, skyBand, weatherLabel } from "@/lib/format";
-import { usePro } from "@/lib/pro";
 import { coarseDawnRating, rateConditions } from "@/lib/rating";
 import {
   localDayStart,
@@ -27,7 +26,6 @@ import {
 type Spot = { lat: number; lon: number; gps: boolean };
 
 export function TodayView() {
-  const { pro, ready } = usePro();
   const [mounted, setMounted] = useState(false);
   const [spot, setSpot] = useState<Spot>({ ...HERMANN, gps: false });
   const [forecast, setForecast] = useState<Forecast | null>(null);
@@ -102,7 +100,6 @@ export function TodayView() {
           spot={spot}
           locating={locating}
           geoNote={geoNote}
-          pro={ready && pro}
           onLocate={locate}
           onHermann={() => setSpot({ ...HERMANN, gps: false })}
         />
@@ -116,7 +113,6 @@ function ForecastBody({
   spot,
   locating,
   geoNote,
-  pro,
   onLocate,
   onHermann,
 }: {
@@ -124,7 +120,6 @@ function ForecastBody({
   spot: Spot;
   locating: boolean;
   geoNote: string | null;
-  pro: boolean;
   onLocate: () => void;
   onHermann: () => void;
 }) {
@@ -266,37 +261,22 @@ function ForecastBody({
             </div>
           ))}
         </div>
-        {pro ? (
-          <ul className="mt-3 space-y-2">
-            {days.map((day) => (
-              <li key={`${day.date}-read`} className="card flex items-center justify-between gap-3 py-2">
-                <div>
-                  <p className="text-sm font-semibold">{day.weekday}</p>
-                  <p className="text-xs text-mist-500">{day.major}</p>
-                </div>
-                <p className="nums text-sm">
-                  Bite {day.bite.toFixed(1)} · Move {day.move.toFixed(1)}
-                </p>
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <Link href="/pro" className="card mt-3 block">
-            <p className="eyebrow">Pro read</p>
-            <p className="mt-1 font-medium">Seven dawns of bite, move, and the major period.</p>
-            <p className="mt-1 text-sm text-blaze-400">Unlock on the Pro page</p>
-          </Link>
-        )}
+        <ul className="mt-3 space-y-2">
+          {days.map((day) => (
+            <li key={`${day.date}-read`} className="card flex items-center justify-between gap-3 py-2">
+              <div>
+                <p className="text-sm font-semibold">{day.weekday}</p>
+                <p className="text-xs text-mist-500">{day.major}</p>
+              </div>
+              <p className="nums text-sm">
+                Bite {day.bite.toFixed(1)} · Move {day.move.toFixed(1)}
+              </p>
+            </li>
+          ))}
+        </ul>
       </section>
 
-      {!pro ? (
-        <aside className="card border-dashed">
-          <p className="eyebrow">Field note</p>
-          <p className="mt-1 text-sm leading-relaxed text-mist-300">
-            Reserved for a Hermann-area sponsor. Pro hides this strip. Nothing here is a paid ad yet.
-          </p>
-        </aside>
-      ) : null}
+      <AdSlot placement="today" />
 
       <p className="px-1 text-xs leading-relaxed text-mist-500">
         Weather from Open-Meteo, no key. Home water is Hermann, Missouri, until you share a location.

@@ -1,5 +1,5 @@
-const CACHE = "dawn-patrol-v2";
-const PRECACHE = ["/", "/game", "/seasons", "/places", "/log", "/pro", "/manifest.webmanifest"];
+const CACHE = "dawn-patrol-v3";
+const PRECACHE = ["/", "/game", "/seasons", "/places", "/log", "/about", "/privacy", "/manifest.webmanifest"];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
@@ -34,6 +34,7 @@ self.addEventListener("fetch", (event) => {
   if (request.method !== "GET") return;
   const url = new URL(request.url);
   if (url.origin !== self.location.origin) return;
+  if (url.pathname === "/ads.txt" || url.pathname === "/app-ads.txt") return;
 
   if (request.mode === "navigate") {
     event.respondWith(

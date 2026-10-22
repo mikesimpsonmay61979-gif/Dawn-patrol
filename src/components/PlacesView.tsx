@@ -1,8 +1,10 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useMemo, useState } from "react";
+import { Fragment, useMemo, useState } from "react";
+import { AdSlot } from "@/components/AdSlot";
 import { PLACES, WATER_FILTERS, type WaterGroup } from "@/data/places";
+import { adSlotRendered } from "@/lib/ads";
 
 const PlacesMap = dynamic(() => import("@/components/PlacesMap").then((mod) => mod.PlacesMap), {
   ssr: false,
@@ -47,10 +49,11 @@ export function PlacesView() {
         Map tiles © OpenStreetMap contributors. Area names and descriptions follow Missouri Department of Conservation and Missouri State Parks pages.
       </p>
       <ul className="space-y-2">
-        {places.map((place) => {
+        {places.map((place, index) => {
           const selected = place.id === selectedId;
           return (
-            <li key={place.id}>
+            <Fragment key={place.id}>
+            <li>
               <button
                 type="button"
                 onClick={() => setSelectedId(place.id)}
@@ -75,8 +78,19 @@ export function PlacesView() {
                 </a>
               </button>
             </li>
+            {index === 2 && adSlotRendered("places") ? (
+              <li>
+                <AdSlot placement="places" />
+              </li>
+            ) : null}
+            </Fragment>
           );
         })}
+        {adSlotRendered("places") && places.length > 0 && places.length < 3 ? (
+          <li>
+            <AdSlot placement="places" />
+          </li>
+        ) : null}
       </ul>
     </div>
   );
