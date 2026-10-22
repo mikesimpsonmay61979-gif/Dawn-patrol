@@ -1,25 +1,21 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect, useState } from "react";
 import { missouriDate, prettyDate } from "@/lib/dates";
 import {
   compressPhoto,
   downloadCsv,
   emptyDraft,
-  FREE_LOG_LIMIT,
   loadLog,
   saveLog,
   SPECIES_SUGGESTIONS,
   type LogEntry,
   type LogKind,
 } from "@/lib/log";
-import { usePro } from "@/lib/pro";
 
 type Draft = Omit<LogEntry, "id" | "createdAt">;
 
 export function LogView() {
-  const { pro, ready } = usePro();
   const [entries, setEntries] = useState<LogEntry[]>([]);
   const [mounted, setMounted] = useState(false);
   const [open, setOpen] = useState(false);
@@ -34,9 +30,6 @@ export function LogView() {
     setDraft(emptyDraft(missouriDate()));
     setMounted(true);
   }, []);
-
-  const unlocked = ready && pro;
-  const atCap = !unlocked && entries.length >= FREE_LOG_LIMIT;
 
   function persist(next: LogEntry[]) {
     const sorted = [...next].sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : 0));
@@ -81,10 +74,6 @@ export function LogView() {
       const ok = persist(entries.map((entry) => (entry.id === editing ? { ...entry, ...nextDraft } : entry)));
       if (!ok) return;
     } else {
-      if (atCap) {
-        setError(`The free book holds ${FREE_LOG_LIMIT}. Export or go Pro to add more.`);
-        return;
-      }
       const entry: LogEntry = {
         ...nextDraft,
         id: crypto.randomUUID(),
@@ -143,8 +132,7 @@ export function LogView() {
         </button>
       </header>
       <p className="text-sm text-mist-300">
-        {entries.length} {entries.length === 1 ? "entry" : "entries"}
-        {unlocked ? " · Pro, no cap" : ` · ${FREE_LOG_LIMIT} on the free book`}. Photos stay on this device.
+        {entries.length} {entries.length === 1 ? "entry" : "entries"} on this phone. No limit. Photos stay on this device.
       </p>
 
       {open ? (
@@ -241,7 +229,7 @@ export function LogView() {
           ) : null}
           {error ? <p className="text-sm text-blaze-400">{error}</p> : null}
           <div className="flex gap-2">
-            <button type="submit" className="btn btn-blaze flex-1" disabled={!editing && atCap}>
+            <button type="submit" className="btn btn-blaze flex-1">
               {editing ? "Save changes" : "Add to the book"}
             </button>
             <button
@@ -262,26 +250,15 @@ export function LogView() {
         <button
           type="button"
           className="btn btn-blaze w-full"
-          disabled={atCap}
           onClick={() => {
             setEditing(null);
             setDraft(emptyDraft(missouriDate()));
             setOpen(true);
           }}
         >
-          {atCap ? "Free book is full" : "Add an entry"}
+          Add an entry
         </button>
       )}
-
-      {atCap ? (
-        <p className="text-sm text-mist-300">
-          Export what you have, delete one, or{" "}
-          <Link href="/pro" className="font-semibold text-blaze-400">
-            unlock Pro
-          </Link>{" "}
-          for an unlimited book on this phone. Turning Pro off later does not delete entries.
-        </p>
-      ) : null}
 
       {entries.length === 0 ? (
         <div className="card">

@@ -1,22 +1,22 @@
 # Dawn Patrol
 
-A Missouri-first hunting and fishing app for the Hermann stretch of the river. Free to use. Pro is a local demo until Stripe is connected. Built for Michael Simpson, Hermann, Missouri.
+A Missouri-first hunting and fishing app for the Hermann stretch of the river. Completely free. Built for Michael Simpson, Hermann, Missouri, and published by Soul Healing Studios.
 
-Dawn Patrol is a mobile-first Progressive Web App: timber green, blaze orange, and a dawn sky. It runs with no paid API keys.
+Dawn Patrol is a mobile-first Progressive Web App: timber green, blaze orange, and a dawn sky. It runs with no paid API keys. There is no subscription and no locked feature.
 
 ## What you can do
 
-**Today.** Current weather, wind, and the barometer trend from the free [Open-Meteo](https://open-meteo.com/) forecast. The phone’s location is used when you allow it; otherwise the spot is Hermann, MO (38.7042, -91.4371). Sunrise and sunset come from the same forecast. Moon phase and solunar major/minor periods are computed on the device from the moon’s position. Bite and move ratings are a simple read of wind, pressure, light, and the moon — a planning aid, not a promise.
+**Today.** Current weather, wind, and the barometer trend from the free [Open-Meteo](https://open-meteo.com/) forecast. The phone’s location is used when you allow it; otherwise the spot is Hermann, MO (38.7042, -91.4371). Sunrise and sunset come from the same forecast. Moon phase and solunar major/minor periods are computed on the device from the moon’s position. Bite and move ratings are a simple read of wind, pressure, light, and the moon — a planning aid, not a promise. The next seven dawns show a bite rating, a move rating, and the morning major period.
 
-**The Read.** One hunt-or-fish card per day, the same card for everyone, seeded by the Missouri (America/Chicago) date. You call the water or cover, the bait or play, and the hour. Each call is worth up to 3. A limit is 9. Streaks, a shareable result, and a ledger of past scores stay in `localStorage` on this phone. There is no account and no global leaderboard.
+**The Read.** One hunt-or-fish card per day, the same card for everyone, seeded by the Missouri (America/Chicago) date. You call the water or cover, the bait or play, and the hour. Each call is worth up to 3. A limit is 9. Streaks, a shareable result, and a ledger of past scores stay in `localStorage` on this phone. There is no account and no global leaderboard. Second Watch is the other quarry the same day. Drift is a practice card. Neither one changes the daily streak.
 
 **Seasons.** A static snapshot of common Missouri game and fish seasons, labeled as a planning aid. Every row links to an official Missouri Department of Conservation page. This app does not state bag limits, and it is not the Wildlife Code. Confirm the season, your zone, and your county on [mdc.mo.gov](https://mdc.mo.gov/) before you hunt or fish.
 
 **Places.** A Leaflet map on OpenStreetMap tiles with a starter set of real public conservation areas and river access near the Missouri, Gasconade, and Osage. Pins are published points, not boundaries. Access and area rules change.
 
-**Log.** A catch and harvest book stored on the phone: species, date, location, count, notes, and an optional photo. Export to CSV anytime. The free book holds 12 entries. Entries already saved are kept if Pro is turned off.
+**Log.** A catch and harvest book stored on the phone: species, date, location, count, notes, and an optional photo. Export to CSV anytime. There is no entry cap.
 
-**Pro.** $4.99/month or $29.99/year on the pricing page. Pro clears the sponsor strip, adds a seven-day solunar and dawn rating, lifts the log cap, and unlocks Second Watch plus Drift (practice cards that don’t touch the daily streak). The switch on that page unlocks Pro locally so you can try it. It does not charge a card.
+**About.** Who publishes the app, how to write [minddriftstudio79@gmail.com](mailto:minddriftstudio79@gmail.com), and a link to the privacy page. The old Pro address (`/pro`) redirects here.
 
 ## Run it
 
@@ -34,7 +34,7 @@ Install it from the browser: Add to Home Screen on iOS, or the install icon in C
 
 ## Deploy to Vercel
 
-No environment variables are required.
+No environment variables are required. Ads stay off until you set the ones below.
 
 1. Push this repo to GitHub.
 2. In Vercel, import the project. Framework preset: Next.js. Build command: `npm run build`. Output is the default Next.js build.
@@ -42,21 +42,40 @@ No environment variables are required.
 
 Open-Meteo and OpenStreetMap are called from the browser. Nothing in the deploy needs a secret.
 
-## How paid Pro would be wired
+`NEXT_PUBLIC_*` values are inlined at build time. Set them in the host before `npm run build`, then redeploy when they change. `ADS_TXT` is read when `/ads.txt` is requested.
 
-Money is intentionally not collected yet. The hook is in two places:
+## Advertising
 
-- `src/lib/billing.ts` — plan ids, the $4.99 and $29.99 prices, and `startCheckout()`.
-- `src/app/api/checkout/route.ts` — `POST /api/checkout` with `{ "plan": "monthly" | "yearly" }`.
+`<AdSlot>` in `src/components/AdSlot.tsx` is a normal-flow display unit. Placements:
 
-Today that route returns `501` and tells the page to use the demo switch. To turn on Stripe later:
+- Today, under the seven-day read
+- The Read, under a finished daily card (not while the card is still open)
+- Seasons, in the list
+- Places, in the list under the map
 
-1. `npm install stripe`
-2. Set `STRIPE_SECRET_KEY`, `STRIPE_PRICE_MONTHLY`, and `STRIPE_PRICE_YEARLY` in Vercel (recurring prices for $4.99/month and $29.99/year).
-3. In the checkout route, create a Checkout Session in `subscription` mode and return `{ "url": session.url }`. The commented block in that file is the shape of the call.
-4. Add a webhook route for `checkout.session.completed` and `customer.subscription.deleted` once there is an account to attach the subscription to. Right now Pro is a flag in `localStorage` (`dawn-patrol-pro`). A real subscription should set that entitlement on a server, not trust the phone.
+Units are never fixed, sticky, or full screen. In AdSense, create responsive display units only. Do not turn on anchor ads, vignettes, or interstitials. Those cover the page.
 
-The demo switch stays useful for screenshots and for trying the Pro screens without a card.
+| Variable | Role |
+| --- | --- |
+| `NEXT_PUBLIC_ADSENSE_CLIENT` | `ca-pub-` plus 16 digits. Loads `adsbygoogle.js`. |
+| `NEXT_PUBLIC_ADSENSE_SLOT` | Digit unit id used wherever a placement slot is empty. |
+| `NEXT_PUBLIC_ADSENSE_SLOT_TODAY` | Today banner. |
+| `NEXT_PUBLIC_ADSENSE_SLOT_GAME` | Under the daily result. |
+| `NEXT_PUBLIC_ADSENSE_SLOT_SEASONS` | In the seasons list. |
+| `NEXT_PUBLIC_ADSENSE_SLOT_PLACES` | In the places list. |
+| `ADS_TXT` | Optional full body for `/ads.txt` and `/app-ads.txt`. |
+
+A client id or slot that does not match those shapes counts as unset. When a placement is unset, `npm run dev` draws a dashed box labeled Advertisement. A production build draws nothing and does not load the AdSense script.
+
+`/ads.txt` is the site file. `/app-ads.txt` serves the same body for a developer website hosted on this domain. With `NEXT_PUBLIC_ADSENSE_CLIENT` set and no `ADS_TXT`, the line is:
+
+```text
+google.com, pub-################, DIRECT, f08c47fec0942fa0
+```
+
+With neither set, both URLs return a comment-only placeholder. Names and the Play Console steps are in [docs/PLAY_STORE_ADS.md](docs/PLAY_STORE_ADS.md). Copy `.env.example` when you are ready to fill them in.
+
+A short notice on first launch says the app may show ads and links to `/privacy`. Dismissing it stores a flag on the phone. It does not replace Google’s own consent message where Google requires one.
 
 ## Data, on purpose
 

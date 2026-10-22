@@ -1,7 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import { Fraunces, Outfit } from "next/font/google";
+import Script from "next/script";
 import { AppShell } from "@/components/AppShell";
-import { ProProvider } from "@/lib/pro";
+import { adsenseClient } from "@/lib/ads";
 import "leaflet/dist/leaflet.css";
 import "./globals.css";
 
@@ -35,12 +36,20 @@ export const viewport: Viewport = {
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
+  const client = adsenseClient();
   return (
     <html lang="en" className={`${outfit.variable} ${fraunces.variable}`}>
       <body className="font-sans antialiased">
-        <ProProvider>
-          <AppShell>{children}</AppShell>
-        </ProProvider>
+        {client ? (
+          <Script
+            id="adsense"
+            async
+            src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${client}`}
+            crossOrigin="anonymous"
+            strategy="afterInteractive"
+          />
+        ) : null}
+        <AppShell>{children}</AppShell>
       </body>
     </html>
   );
