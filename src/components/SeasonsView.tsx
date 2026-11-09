@@ -1,7 +1,9 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { Fragment, useEffect, useMemo, useState } from "react";
+import { AdSlot } from "@/components/AdSlot";
 import { SEASON_DISCLAIMER, SEASON_SOURCES, SEASONS } from "@/data/seasons";
+import { adSlotRendered } from "@/lib/ads";
 import { missouriDate } from "@/lib/dates";
 import { formatSeasonWhen, nextOpenLabel, pillLabel, seasonPill, seasonSortKey, type SeasonPill } from "@/lib/seasons";
 
@@ -70,11 +72,12 @@ export function SeasonsView() {
       {!today ? <div className="skel h-40" /> : null}
       <ul className="space-y-3">
         {today
-          ? rows.map((season) => {
+          ? rows.map((season, index) => {
               const pill = seasonPill(season, today);
               const soon = nextOpenLabel(season, today);
               return (
-                <li key={season.id} className="card">
+                <Fragment key={season.id}>
+                <li className="card">
                   <div className="flex items-start justify-between gap-3">
                     <div>
                       <p className="text-xs tracking-wide text-mist-500 uppercase">{season.group}</p>
@@ -95,9 +98,20 @@ export function SeasonsView() {
                     {season.linkLabel} ↗
                   </a>
                 </li>
+                {index === 3 && adSlotRendered("seasons") ? (
+                  <li>
+                    <AdSlot placement="seasons" />
+                  </li>
+                ) : null}
+                </Fragment>
               );
             })
           : null}
+        {today && adSlotRendered("seasons") && rows.length > 0 && rows.length < 4 ? (
+          <li>
+            <AdSlot placement="seasons" />
+          </li>
+        ) : null}
       </ul>
       {today && rows.length === 0 ? (
         <p className="text-sm text-mist-300">Nothing matches. Try a species, or clear the filter.</p>

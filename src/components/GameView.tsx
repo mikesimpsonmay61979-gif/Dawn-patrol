@@ -1,7 +1,7 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
+import { AdSlot } from "@/components/AdSlot";
 import { missouriDate, prettyDate } from "@/lib/dates";
 import {
   bestOption,
@@ -27,12 +27,10 @@ import {
   type SavedPlay,
 } from "@/lib/game";
 import type { Option } from "@/lib/game-types";
-import { usePro } from "@/lib/pro";
 
 const EMPTY_PICKS: Picks = { spot: "", play: "", window: "" };
 
 export function GameView() {
-  const { pro, ready } = usePro();
   const [today, setToday] = useState<string | null>(null);
   const [save, setSave] = useState<GameSave>(emptySave());
   const [picks, setPicks] = useState<Picks>(EMPTY_PICKS);
@@ -92,7 +90,10 @@ export function GameView() {
       </header>
 
       {played ? (
-        <ResultCard puzzle={puzzle} play={played} streak={liveStreak(save, date)} copied={copied} onCopy={setCopied} />
+        <>
+          <ResultCard puzzle={puzzle} play={played} streak={liveStreak(save, date)} copied={copied} onCopy={setCopied} />
+          <AdSlot placement="game" />
+        </>
       ) : (
         <PuzzleCard
           puzzle={puzzle}
@@ -113,8 +114,6 @@ export function GameView() {
 
       <section className="space-y-3">
         <h2 className="font-display text-2xl">Extra reads</h2>
-        {ready && pro ? (
-          <>
             <article className="card">
               <p className="eyebrow">Second watch</p>
               <p className="mt-1 text-sm text-mist-300">
@@ -209,13 +208,6 @@ export function GameView() {
                 {drift ? "Another drift" : "Run a drift"}
               </button>
             </article>
-          </>
-        ) : (
-          <Link href="/pro" className="card block">
-            <p className="font-medium">Second Watch and Drift are Pro.</p>
-            <p className="mt-1 text-sm text-mist-300">The daily card stays free. The demo switch on the Pro page unlocks the rest on this phone.</p>
-          </Link>
-        )}
       </section>
 
       <Leaderboard save={save} />

@@ -1,7 +1,6 @@
 import { csvEscape } from "@/lib/format";
 
 export const LOG_KEY = "dawn-patrol-log";
-export const FREE_LOG_LIMIT = 12;
 
 export type LogKind = "catch" | "harvest";
 
